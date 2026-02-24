@@ -1,0 +1,92 @@
+{
+  "name": "spectopus",
+  "version": "0.1.0",
+  "description": "The OpenAPI 3.1 spec builder that LLMs actually love — fluent, TypeScript-first, with first-class LLM output adapters",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./llm": {
+      "types": "./dist/llm/index.d.ts",
+      "import": "./dist/llm/index.js",
+      "require": "./dist/llm/index.cjs"
+    },
+    "./decorators": {
+      "types": "./dist/decorators/index.d.ts",
+      "import": "./dist/decorators/index.js",
+      "require": "./dist/decorators/index.cjs"
+    },
+    "./adapters/zod": {
+      "types": "./dist/adapters/zod.d.ts",
+      "import": "./dist/adapters/zod.js",
+      "require": "./dist/adapters/zod.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "keywords": [
+    "openapi",
+    "openapi3",
+    "swagger",
+    "api",
+    "spec",
+    "builder",
+    "fluent",
+    "typescript",
+    "llm",
+    "openai",
+    "anthropic",
+    "zod",
+    "decorator"
+  ],
+  "author": "spectopus contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spectopus/spectopus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/spectopus/spectopus/issues"
+  },
+  "homepage": "https://github.com/spectopus/spectopus#readme",
+  "peerDependencies": {
+    "zod": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.33",
+    "@vitest/coverage-v8": "^1.6.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^1.6.1",
+    "zod": "^3.25.76"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
