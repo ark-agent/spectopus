@@ -28,3 +28,8 @@ npm-debug.log*
 
 # OS
 Thumbs.db
+
+# Auth — never commit
+.npmrc
+.env
+*.env
