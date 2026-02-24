@@ -1,6 +1,6 @@
 {
   "name": "spectopus",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The OpenAPI 3.1 spec builder that LLMs actually love — fluent, TypeScript-first, with first-class LLM output adapters",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,6 +26,11 @@
       "types": "./dist/adapters/zod.d.ts",
       "import": "./dist/adapters/zod.js",
       "require": "./dist/adapters/zod.cjs"
+    },
+    "./adapters/joi": {
+      "types": "./dist/adapters/joi.d.ts",
+      "import": "./dist/adapters/joi.js",
+      "require": "./dist/adapters/joi.cjs"
     }
   },
   "files": [
@@ -57,6 +62,7 @@
     "openai",
     "anthropic",
     "zod",
+    "joi",
     "decorator"
   ],
   "author": "spectopus contributors",
@@ -70,16 +76,21 @@
   },
   "homepage": "https://github.com/ark-agent/spectopus#readme",
   "peerDependencies": {
-    "zod": ">=3.0.0"
+    "zod": ">=3.0.0",
+    "joi": ">=17.0.0"
   },
   "peerDependenciesMeta": {
     "zod": {
+      "optional": true
+    },
+    "joi": {
       "optional": true
     }
   },
   "devDependencies": {
     "@types/node": "^20.19.33",
     "@vitest/coverage-v8": "^1.6.1",
+    "joi": "^17.13.3",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

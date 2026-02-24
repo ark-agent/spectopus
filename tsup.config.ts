@@ -6,6 +6,7 @@ export default defineConfig({
     'llm/index': 'src/llm/index.ts',
     'decorators/index': 'src/decorators/index.ts',
     'adapters/zod': 'src/adapters/zod.ts',
+    'adapters/joi': 'src/adapters/joi.ts',
   },
   format: ['esm', 'cjs'],
   dts: true,

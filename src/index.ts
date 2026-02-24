@@ -35,7 +35,7 @@ export type { SpecBuilderOptions } from './builder/SpecBuilder.js';
 
 export { OperationBuilder } from './builder/OperationBuilder.js';
 
-export { SchemaBuilder, schemas, isZodSchema } from './builder/SchemaBuilder.js';
+export { SchemaBuilder, schemas, isZodSchema, isJoiSchema } from './builder/SchemaBuilder.js';
 export type { SchemaInput } from './builder/SchemaBuilder.js';
 
 export { ResponseBuilder, jsonResponse, emptyResponse } from './builder/ResponseBuilder.js';
@@ -64,6 +64,10 @@ export type { CompactOptions } from './llm/compact.js';
 // ─── Zod Adapter ──────────────────────────────────────────────────────────────
 export { zodToOpenAPI } from './adapters/zod.js';
 export type { ZodToOpenAPIOptions } from './adapters/zod.js';
+
+// ─── Joi Adapter ──────────────────────────────────────────────────────────────
+export { joiToOpenAPI, joiDescriptionToOpenAPI } from './adapters/joi.js';
+export type { JoiToOpenAPIOptions, JoiSchema } from './adapters/joi.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type {

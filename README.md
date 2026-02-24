@@ -7,7 +7,7 @@
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.1-green.svg)](https://spec.openapis.org/oas/v3.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero deps](https://img.shields.io/badge/runtime_deps-0-brightgreen.svg)](#zero-dependencies)
-[![Tests](https://img.shields.io/badge/tests-161%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-211%20passing-brightgreen.svg)](#)
 
 ---
 
@@ -62,6 +62,7 @@ Change `CreateUserSchema` and your documentation changes with it — automatical
 | **OpenAPI 3.1** | Full spec support including JSON Schema 2020-12 |
 | **Fluent builder API** | Chainable, immutable, TypeScript-native |
 | **Zod integration** | Your validation schemas become your API docs |
+| **Joi integration** | First-class support for Joi 17+ schemas |
 | **LLM adapters** | Export as OpenAI tools, Anthropic tools, or compact context |
 | **Decorator API** | Class-based controllers with colocated docs |
 | **Zero runtime deps** | Pure TypeScript. Nothing to audit. Nothing to break. |
@@ -74,11 +75,13 @@ Change `CreateUserSchema` and your documentation changes with it — automatical
 
 ```bash
 npm install spectopus
-# If using Zod integration (recommended):
+# If using Zod integration:
 npm install zod
+# If using Joi integration:
+npm install joi
 ```
 
-spectopus has **zero required runtime dependencies**. Zod is an optional peer dependency — install it only if you want the Zod adapter.
+spectopus has **zero required runtime dependencies**. Both Zod and Joi are optional peer dependencies — install only what you use.
 
 ---
 
@@ -297,6 +300,91 @@ const openAPISchema = zodToOpenAPI(z.object({
 | `z.set(T)` | `{ type: "array", uniqueItems: true, items: T }` |
 | `z.branded(T)` | Inner type (brand erased) |
 | `z.describe("...")` | `{ description: "..." }` |
+
+---
+
+## Joi Integration
+
+spectopus supports [Joi](https://joi.dev/) 17+ as a first-class schema source alongside Zod. Pass Joi schemas anywhere a schema is expected — in `OperationBuilder`, response definitions, or directly via `joiToOpenAPI`.
+
+Joi uses its stable public `.describe()` API under the hood, so spectopus works across all Joi 17+ releases without coupling to internal properties.
+
+```ts
+import Joi from 'joi';
+import { joiToOpenAPI, SpecBuilder, OperationBuilder } from 'spectopus';
+
+// Manual conversion
+const openAPISchema = joiToOpenAPI(Joi.object({
+  id:    Joi.string().uuid().required(),
+  name:  Joi.string().min(1).max(100).required(),
+  age:   Joi.number().integer().min(0).optional(),
+  email: Joi.string().email().required(),
+  role:  Joi.string().valid('admin', 'user', 'guest').default('user'),
+}));
+
+// Or pass Joi schemas directly into the builder API
+const spec = new SpecBuilder()
+  .title('My API').version('1.0.0')
+  .add('/users', 'post',
+    new OperationBuilder()
+      .summary('Create a user')
+      .body(Joi.object({ name: Joi.string().required() }))  // ← Joi schema
+      .response(201, Joi.object({ id: Joi.string().uuid() }))
+  )
+  .build();
+```
+
+### Supported Joi Types
+
+| Joi Schema | OpenAPI Output |
+|---|---|
+| `Joi.string()` | `{ type: "string" }` |
+| `Joi.string().email()` | `{ type: "string", format: "email" }` |
+| `Joi.string().uri()` | `{ type: "string", format: "uri" }` |
+| `Joi.string().guid()` / `.uuid()` | `{ type: "string", format: "uuid" }` |
+| `Joi.string().isoDate()` | `{ type: "string", format: "date-time" }` |
+| `Joi.string().hostname()` | `{ type: "string", format: "hostname" }` |
+| `Joi.string().min(n).max(m)` | `{ minLength: n, maxLength: m }` |
+| `Joi.string().length(n)` | `{ minLength: n, maxLength: n }` |
+| `Joi.string().pattern(/.../)` | `{ pattern: "..." }` |
+| `Joi.string().alphanum()` | `{ pattern: "^[a-zA-Z0-9]*$" }` |
+| `Joi.string().hex()` | `{ pattern: "^[a-fA-F0-9]*$" }` |
+| `Joi.string().base64()` | `{ contentEncoding: "base64" }` |
+| `Joi.number()` | `{ type: "number" }` |
+| `Joi.number().integer()` | `{ type: "integer" }` |
+| `Joi.number().min(n).max(m)` | `{ minimum: n, maximum: m }` |
+| `Joi.number().greater(n).less(m)` | `{ exclusiveMinimum: n, exclusiveMaximum: m }` |
+| `Joi.number().multiple(n)` | `{ multipleOf: n }` |
+| `Joi.boolean()` | `{ type: "boolean" }` |
+| `Joi.date()` | `{ type: "string", format: "date-time" }` |
+| `Joi.binary()` | `{ type: "string", contentEncoding: "base64" }` |
+| `Joi.object({...})` | Full object schema with `required[]` |
+| `Joi.array().items(T)` | `{ type: "array", items: T }` |
+| `Joi.array().items(A, B)` | `{ type: "array", items: { anyOf: [A, B] } }` |
+| `Joi.array().ordered(A, B)` | `{ prefixItems: [A, B], items: false }` (tuple) |
+| `Joi.array().min(n).max(m)` | `{ minItems: n, maxItems: m }` |
+| `Joi.array().unique()` | `{ uniqueItems: true }` |
+| `Joi.alternatives().try(A, B)` | `{ anyOf: [A, B] }` |
+| `.valid('a', 'b')` | `{ enum: ['a', 'b'] }` |
+| `.allow(null)` | `{ type: ["T", "null"] }` (JSON Schema 2020-12) |
+| `.default(v)` | `{ default: v }` |
+| `.description("...")` | `{ description: "..." }` |
+| `.required()` / `.optional()` | Tracked in parent object's `required[]` |
+| `Joi.any()` | `{}` (accepts anything) |
+
+### Direct Description Conversion
+
+If you already have Joi's describe output (e.g. from serialization), use `joiDescriptionToOpenAPI`:
+
+```ts
+import { joiDescriptionToOpenAPI } from 'spectopus';
+
+const desc = Joi.string().email().describe();
+// { type: 'string', rules: [{ name: 'email' }] }
+
+const schema = joiDescriptionToOpenAPI(desc);
+// { type: 'string', format: 'email' }
+```
 
 ---
 
@@ -566,6 +654,28 @@ zodToOpenAPI(zodSchema, {
 })
 ```
 
+### joiToOpenAPI
+
+```ts
+import { joiToOpenAPI, joiDescriptionToOpenAPI } from 'spectopus';
+
+// Convert a Joi schema instance
+joiToOpenAPI(joiSchema, {
+  includeDescriptions?: boolean,  // Include .description() text
+  includeDefaults?: boolean,      // Include .default() values
+  maxDepth?: number,              // Max recursion depth (default: 20)
+})
+
+// Convert raw describe() output (plain object — no Joi instance required)
+joiDescriptionToOpenAPI(joiSchema.describe(), options?)
+```
+
+Also available as a named sub-path import:
+
+```ts
+import { joiToOpenAPI } from 'spectopus/adapters/joi';
+```
+
 ---
 
 ## Zero Dependencies
@@ -573,6 +683,7 @@ zodToOpenAPI(zodSchema, {
 spectopus's runtime has **no required dependencies**. Zero. The package is pure TypeScript compiled to JavaScript.
 
 - **Zod** is an optional peer dependency. Install it only if you want the Zod adapter. Without it, you can still use plain `SchemaObject` definitions.
+- **Joi** is an optional peer dependency. Install it only if you want the Joi adapter. spectopus uses Joi's public `.describe()` API — no internal coupling.
 - **YAML libraries** (`yaml` or `js-yaml`) are only needed if you call `.toYAML()`. Neither is required.
 - **LLM SDKs** are not required — spectopus just produces plain JavaScript objects that match the tool definition formats.
 
@@ -586,6 +697,7 @@ This means spectopus is fast to install, easy to audit, and won't bloat your dep
 |---|---|---|---|---|
 | **Colocation** | ✅ Schema IS the doc | ❌ JSDoc is separate annotation | ⚠️ Decorator-only | ❌ Manual types |
 | **Zod-native** | ✅ First-class | ❌ | ❌ | ❌ |
+| **Joi support** | ✅ First-class | ❌ | ❌ | ❌ |
 | **LLM adapters** | ✅ Built-in | ❌ | ❌ | ❌ |
 | **Runtime deps** | ✅ Zero | ⚠️ Some | ⚠️ Some | ✅ Zero |
 | **OpenAPI 3.1** | ✅ | ⚠️ Partial | ⚠️ 3.0 | ✅ |
@@ -714,7 +826,7 @@ Contributions are very welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 Areas we'd love help with:
 - More Zod type coverage edge cases
-- Joi → OpenAPI adapter (`spectopus/adapters/joi`)
+- More Joi type coverage edge cases
 - Valibot adapter (`spectopus/adapters/valibot`)
 - Express/Fastify/Hono route extraction helpers
 - CLI tool (`spectopus generate --output openapi.json`)

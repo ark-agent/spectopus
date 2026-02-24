@@ -25,6 +25,22 @@ export function isZodSchema(value: unknown): value is ZodTypeAny {
 }
 
 /**
+ * Check if a value looks like a Joi schema object.
+ * We use duck-typing to avoid requiring Joi as a hard dependency.
+ * Joi schemas expose a stable `.describe()` method, `.validate()` method,
+ * and an internal `$_root` reference that is unique to Joi 17+.
+ */
+export function isJoiSchema(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Record<string, unknown>)['describe'] === 'function' &&
+    typeof (value as Record<string, unknown>)['validate'] === 'function' &&
+    '$_root' in (value as object)
+  );
+}
+
+/**
  * Convert any supported schema input to an OpenAPI SchemaObject.
  * Supports: SchemaObject, $ref string, or Zod schema (when Zod is available).
  *
