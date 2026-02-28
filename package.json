@@ -69,12 +69,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wilder-innovation/spectopus.git"
+    "url": "git+https://github.com/Wilder-Innovation/spectopus.git"
   },
   "bugs": {
-    "url": "https://github.com/wilder-innovation/spectopus/issues"
+    "url": "https://github.com/Wilder-Innovation/spectopus/issues"
   },
-  "homepage": "https://github.com/wilder-innovation/spectopus#readme",
+  "homepage": "https://github.com/Wilder-Innovation/spectopus#readme",
   "peerDependencies": {
     "zod": ">=3.0.0",
     "joi": ">=17.0.0"
