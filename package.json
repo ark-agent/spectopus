@@ -69,12 +69,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ark-agent/spectopus.git"
+    "url": "git+https://github.com/wilder-innovation/spectopus.git"
   },
   "bugs": {
-    "url": "https://github.com/ark-agent/spectopus/issues"
+    "url": "https://github.com/wilder-innovation/spectopus/issues"
   },
-  "homepage": "https://github.com/ark-agent/spectopus#readme",
+  "homepage": "https://github.com/wilder-innovation/spectopus#readme",
   "peerDependencies": {
     "zod": ">=3.0.0",
     "joi": ">=17.0.0"
